@@ -1,0 +1,9 @@
+export CLICKHOUSE_HOST=http://localhost:8123
+export CLICKHOUSE_USERNAME=default
+export CLICKHOUSE_PASSWORD=
+export CLICKHOUSE_DATABASE=virtual_agents_on_solana
+export NETWORK=https://mainnet.sol.streamingfast.io:443
+export PACKAGE_FILE_PATH=/Users/harshrjjpt/Developer/Dapplooker/loky-subgraph/SolanaDualPackageSubstream/substream_src/solana-explorer-v0.2.1.spkg
+export BLOCKS_GAP="+10000"
+export BLOCKS_GAP_NUMBER=10000 
+export LOG_LEVEL=INFO

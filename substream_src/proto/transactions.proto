@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package sol.transactions.v1;
+
+
+message Instructions {
+  repeated Instruction instructions = 1;
+}
+
+message Instruction {
+  string program_id = 1;
+  repeated string accounts = 2;
+  string data = 3;
+}
+
+message Transactions {
+  repeated Transaction transactions = 1;
+}
+
+message Transaction {
+  string symbol = 1;
+  string name = 2;
+  uint64 created_at = 3;
+  string dev_wallet = 4;
+  string total_supply = 5;
+  string tx_hash = 6;
+  uint64 created_block_number = 7;
+  string status = 8;
+  string id = 9;
+}
