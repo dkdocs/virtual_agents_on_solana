@@ -1,25 +1,18 @@
-use crate::{constants};
-use crate::pb::solana_token_tracker::types::v1::{
-    Burn, InitializedAccount, Mint, Output, Transfer,
-};
+use crate::constants;
+use crate::pb::solana_token_tracker::types::v1::{Burn, InitializedAccount, Mint, Output, Transfer};
 use std::ops::Div;
 use substreams::errors::Error;
 
-use substreams_solana::pb::sf::solana::r#type::v1::{
-    CompiledInstruction, TokenBalance, TransactionStatusMeta,
-};
+use substreams_solana::pb::sf::solana::r#type::v1::{CompiledInstruction, TokenBalance, TransactionStatusMeta};
 
-use substreams_solana_program_instructions::{
-    token_instruction_2022::TokenInstruction
-};
-use substreams::{ log };
+use substreams::log;
+use substreams_solana_program_instructions::token_instruction_2022::TokenInstruction;
 
 #[derive(Debug)]
 pub struct TokenParams {
     pub token_contract: String,
     pub token_decimals: f64,
 }
-
 
 pub fn process_compiled_instruction(
     output: &mut Output,
@@ -30,20 +23,41 @@ pub fn process_compiled_instruction(
     inst: &CompiledInstruction,
     accounts: &Vec<String>,
     parameters: &Vec<TokenParams>,
-    block_number: u64
+    block_number: u64,
 ) {
     let instruction_program_account = &accounts[inst.program_id_index as usize];
 
     if instruction_program_account == constants::TOKEN_PROGRAM {
-        if let Err(err) = process_token_instruction(trx_hash, timestamp, &inst.data, &inst.accounts, meta, accounts, output, parameters, inst_index.to_string(), block_number) {
+        if let Err(err) = process_token_instruction(
+            trx_hash,
+            timestamp,
+            &inst.data,
+            &inst.accounts,
+            meta,
+            accounts,
+            output,
+            parameters,
+            inst_index.to_string(),
+            block_number,
+        ) {
             log::info!(
                 "trx_hash {} top level transaction without inner instructions: {}",
-                trx_hash, err
+                trx_hash,
+                err
             );
         }
     }
 
-    process_inner_instructions(output, inst_index, meta, accounts, trx_hash, timestamp, parameters, block_number);
+    process_inner_instructions(
+        output,
+        inst_index,
+        meta,
+        accounts,
+        trx_hash,
+        timestamp,
+        parameters,
+        block_number,
+    );
 }
 
 pub fn process_inner_instructions(
@@ -54,18 +68,22 @@ pub fn process_inner_instructions(
     trx_hash: &String,
     timestamp: i64,
     parameters: &Vec<TokenParams>,
-    block_number: u64
+    block_number: u64,
 ) {
     let mut inner_instruction_index = 1;
-    
-    if let Some(inner_inst) = meta.inner_instructions.iter().find(|inst| inst.index == instruction_index) {
+
+    if let Some(inner_inst) = meta
+        .inner_instructions
+        .iter()
+        .find(|inst| inst.index == instruction_index)
+    {
         for inner_instruction in inner_inst.instructions.iter() {
             let instruction_program_account = &accounts[inner_instruction.program_id_index as usize];
-            
+
             if instruction_program_account == constants::TOKEN_PROGRAM {
                 inner_instruction_index += 1;
                 let joined_instruction_id = format!("{}.{}", instruction_index, inner_instruction_index);
-                
+
                 if let Err(err) = process_token_instruction(
                     trx_hash,
                     timestamp,
@@ -76,7 +94,7 @@ pub fn process_inner_instructions(
                     output,
                     parameters,
                     joined_instruction_id,
-                    block_number
+                    block_number,
                 ) {
                     log::info!("trx_hash {} filtering inner instructions: {}", trx_hash, err);
                 }
@@ -95,8 +113,8 @@ fn process_token_instruction(
     output: &mut Output,
     parameters: &Vec<TokenParams>,
     instruction_index: String,
-    block_number: u64
-) -> Result<(),Error> {
+    block_number: u64,
+) -> Result<(), Error> {
     match TokenInstruction::unpack(data) {
         Err(err) => {
             log::info!("unpacking token instruction {:?}", err);
@@ -118,14 +136,14 @@ fn process_token_instruction(
                             to: destination.to_owned(),
                             amount: amount_to_decimals(amt as f64, parameter.token_decimals),
                             token_address: parameter.token_contract.to_string(),
-                            block_number
+                            block_number,
                         });
                     }
                 }
             }
             TokenInstruction::MintTo { amount: amt } | TokenInstruction::MintToChecked { amount: amt, .. } => {
                 let mint = fetch_account_to(accounts, inst_accounts[0]);
-                
+
                 for parameter in parameters.iter() {
                     if mint == parameter.token_contract {
                         let account_to = fetch_account_to(accounts, inst_accounts[1]);
@@ -154,9 +172,9 @@ fn fetch_account_to(account_keys: &Vec<String>, position: u8) -> String {
 }
 
 fn is_token_transfer(pre_token_balances: &Vec<TokenBalance>, account: &String, contract_address: &String) -> bool {
-    pre_token_balances.iter().any(|token_balance| 
-        token_balance.owner == *account && token_balance.mint == *contract_address
-    )
+    pre_token_balances
+        .iter()
+        .any(|token_balance| token_balance.owner == *account && token_balance.mint == *contract_address)
 }
 
 #[cfg(test)]

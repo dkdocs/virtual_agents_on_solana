@@ -10,12 +10,12 @@ package:
 network: solana
 
 imports:
-  solana: https://github.com/streamingfast/firehose-solana/releases/download/v0.1.1/solana-v0.1.1.spkg
+  sol: https://spkg.io/streamingfast/solana-common-v0.3.0.spkg
 
 protobuf:
   files:
     - block.proto
-    - transactions.proto
+    - transactions_v1.proto
     - solana-token-tracker.proto
   importPaths:
     - ./proto
@@ -27,29 +27,35 @@ binaries:
 
 modules:
   - name: map_filter_transactions
-    initialBlock: 319903923
     kind: map
+    initialBlock: 319903923
+    inputs:
+      - map: sol:blocks_without_votes
+    output:
+      type: proto:solana.transactions.v1.CreatedTokens
+
+  - name: store_created_tokens
+    kind: store
+    initialBlock: 319903923
     inputs:
       - source: sf.solana.type.v1.Block
-    output:
-      type: proto:sol.transactions.v1.Transactions
-    doc: |
-      `map_filter_transactions` allows you to get all transactions containing the program ID `5U3EU2ubXtK84QcRjWVmYt9RaDyA8gKxdUrPFXmZyaki`.
+      - map: map_filter_transactions
+    updatePolicy: set
+    valueType: int64
 
   - name: map_solana_token_events
     kind: map
     initialBlock: 319903923
     inputs:
-      - params: string
-      - source: sf.solana.type.v1.Block
-      # - store: store_tokens_created
-      #   mode: deltas
+      - source: sol:blocks_without_votes
+      - store: store_created_tokens
+        mode: get
     output:
       type: proto:solana_token_tracker.types.v1.Output    
 
   - name: db_out
-    initialBlock: 319903923
     kind: map
+    initialBlock: 319903923
     inputs:
       - source: sf.solana.type.v1.Block
     output:
@@ -60,4 +66,5 @@ modules:
     inputs:
       - source: sf.solana.type.v1.Block
     output:
-      type: proto:sf.solana.type.v1.Block    
+      type: proto:sf.solana.type.v1.Block
+

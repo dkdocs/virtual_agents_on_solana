@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package sol.transactions.v1;
+package solana.transactions.v1;
 
 
 message Instructions {
@@ -15,6 +15,12 @@ message Instruction {
 
 message Transactions {
   repeated Transaction transactions = 1;
+}
+
+message CreatedTokens {
+  // each entry is the mint address of a token that just graduated or
+  // had its metadata created
+  repeated string tokens = 1;
 }
 
 message Transaction {

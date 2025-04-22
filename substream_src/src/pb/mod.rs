@@ -18,11 +18,27 @@ pub mod sol {
             // @@protoc_insertion_point(sol.block.v1)
         }
     }
+    pub mod instructions {
+        // @@protoc_insertion_point(attribute:sol.instructions.v1)
+        pub mod v1 {
+            include!("sol.instructions.v1.rs");
+            // @@protoc_insertion_point(sol.instructions.v1)
+        }
+    }
     pub mod transactions {
         // @@protoc_insertion_point(attribute:sol.transactions.v1)
         pub mod v1 {
             include!("sol.transactions.v1.rs");
             // @@protoc_insertion_point(sol.transactions.v1)
+        }
+    }
+}
+pub mod solana {
+    pub mod transactions {
+        // @@protoc_insertion_point(attribute:solana.transactions.v1)
+        pub mod v1 {
+            include!("solana.transactions.v1.rs");
+            // @@protoc_insertion_point(solana.transactions.v1)
         }
     }
 }
