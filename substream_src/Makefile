@@ -19,7 +19,7 @@ package: build
 
 .PHONY: stream
 stream: build
-	substreams run -e mainnet.sol.streamingfast.io:443 substreams.yaml map_solana_token_events -s 321090795 -t +1 --debug-modules-output map_solana_token_events
+	substreams run -e mainnet.sol.streamingfast.io:443 substreams.yaml map_block_without_votes -s 321751296 -t +1 --debug-modules-output map_block_without_votes
 
 .PHONY: stream_db
 stream_db: build

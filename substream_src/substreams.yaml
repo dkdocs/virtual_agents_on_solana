@@ -28,7 +28,7 @@ binaries:
 modules:
   - name: map_filter_transactions
     kind: map
-    initialBlock: 319903923
+    initialBlock: 321100949
     inputs:
       - map: sol:blocks_without_votes
     output:
@@ -36,7 +36,7 @@ modules:
 
   - name: store_created_tokens
     kind: store
-    initialBlock: 319903923
+    initialBlock: 321100949
     inputs:
       - source: sf.solana.type.v1.Block
       - map: map_filter_transactions
@@ -45,7 +45,7 @@ modules:
 
   - name: map_solana_token_events
     kind: map
-    initialBlock: 319903923
+    initialBlock: 321100949
     inputs:
       - source: sol:blocks_without_votes
       - store: store_created_tokens
@@ -55,7 +55,7 @@ modules:
 
   - name: db_out
     kind: map
-    initialBlock: 319903923
+    initialBlock: 321100949
     inputs:
       - source: sf.solana.type.v1.Block
     output:
